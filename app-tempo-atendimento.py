@@ -156,8 +156,19 @@ with tab1:
             st.metric("Setores Ativos", setores_unicos)
 
         with col4:
-            maior_fila = df_filtrado["QUANTIDADE"].max()
-            st.metric("Maior Fila", f"{format_brl(maior_fila)}")
+            if not df_filtrado.empty:
+                idx_max = df_filtrado["QUANTIDADE"].idxmax()
+                maior_fila = df_filtrado.loc[idx_max, "QUANTIDADE"]
+                setor_maior = df_filtrado.loc[idx_max, "SETOR"]
+                ano_maior = df_filtrado.loc[idx_max, "ANO"]
+                mes_maior = df_filtrado.loc[idx_max, "MES"]
+                st.metric(
+                    "Maior Fila",
+                    f"{format_brl(maior_fila)}",
+                    f"{setor_maior} / {str(mes_maior).zfill(2)}/{ano_maior}"
+                )
+            else:
+                st.metric("Maior Fila", "0")
 
         st.markdown("---")
 
@@ -402,8 +413,17 @@ with tab2:
             st.metric("Setores Ativos", setores_ativos)
 
         with col4:
-            max_qtde = df_atend_filtrado["QTDE"].max()
-            st.metric("Maior Quantidade", f"{format_brl(max_qtde)}")
+            # Agrupa por SETOR, ANO, MES (ou só SETOR, ajuste conforme sua lógica)
+            df_group = df_atend_filtrado.groupby(["SETOR", "ANO", "MES"], as_index=False)["QTDE"].sum()
+            max_qtde = df_group["QTDE"].max() if not df_group.empty else 0
+            if not df_group.empty:
+                idx_max = df_group["QTDE"].idxmax()
+                setor_max = df_group.loc[idx_max, "SETOR"]
+                ano_max = df_group.loc[idx_max, "ANO"]
+                mes_max = df_group.loc[idx_max, "MES"]
+                st.metric("Maior Quantidade", f"{format_brl(max_qtde)}", f"{setor_max} / {mes_max}/{ano_max}")
+            else:
+                st.metric("Maior Quantidade", "0")
 
         st.markdown("---")
 
